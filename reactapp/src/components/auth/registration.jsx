@@ -1,82 +1,146 @@
-import React, { useState } from 'react'
-import { Button, Form, ButtonToolbar } from 'react-bootstrap';
+import React from 'react'
+import { Button, ButtonToolbar } from 'react-bootstrap';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 
-const Registration = ({ onSubmit }) => {
+export const Registration = () => {
 
     const navigate = useNavigate();
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const validationSchema = Yup.object({
+        name: Yup.string().required('Name is required'),
+        email: Yup.string().email('Invalid email').required('Email is required'),
+        password: Yup.string().required('Password is required'),
+        confirm_password: Yup.string()
+            .oneOf([Yup.ref('password'), null], 'Passwords must match')
+            .required('Confirm Password is required'),
+    });
 
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = (values, { setSubmitting }) => {
 
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: name,
-                email: email,
-                password: password
-            })
-        };
+            body: JSON.stringify(values),
+        }
 
         fetch(`http://localhost:8000/register`, requestOptions).then(async response => {
             const data = await response.json();
             console.log('response is', data);
         });
 
-        navigate('/')
+        setTimeout(() => {
+            // alert(JSON.stringify(values, null, 2));
+            setSubmitting(false);
+        }, 100);
+
+        navigate('/');
     };
 
 
     return (
         <div className="login-form">
-
             <fieldset className="scheduler-border">
                 <legend className="scheduler-border">User Registration</legend>
-                <Form onSubmit={handleSubmit} >
-                    <Form.Group className="mb-3" controlId="name">
-                        <Form.Label>Name</Form.Label>
-                        <Form.Control type="text" placeholder="Enter Name" value={name}
-                            onChange={e => setName(e.target.value)} />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="email">
-                        <Form.Label>Email</Form.Label>
-                        <Form.Control type="email" placeholder="Enter Email" value={email}
-                            onChange={e => setEmail(e.target.value)} />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="password">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" placeholder="********" value={password}
-                            onChange={e => setPassword(e.target.value)} />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="confirm_password">
-                        <Form.Label>Confirm Password</Form.Label>
-                        <Form.Control type="password" placeholder="********" value={confirmPassword}
-                            onChange={e => setConfirmPassword(e.target.value)} />
-                    </Form.Group>
 
-                    <div className='d-flex justify-content-between'>
-                        <small>
-                            <p>Don't have an account? <a href="/login">Login</a> here.
-                            </p>
-                        </small>
+                <Formik
+                    initialValues={{
+                        name: '',
+                        email: '',
+                        password: '',
+                        confirm_password: '',
+                    }}
+                    validationSchema={validationSchema}
+                    onSubmit={handleSubmit} >
 
-                        <ButtonToolbar className="text-right" >
+                    {({ isSubmitting }) => (
+                        <Form >
+                            <Field name="name">
+                                {({ field, meta }) => (
+                                    <div className="form-group">
+                                        <label htmlFor="name">Name</label>
+                                        <input
+                                            type="text"
+                                            id="name"
+                                            className={`form-control ${meta.touched && meta.error ? 'is-invalid' : ''
+                                                }`}
+                                            {...field}
+                                        />
+                                        <ErrorMessage name="name" component="div" className="error text-danger" />
+                                    </div>
+                                )}
+                            </Field>
 
-                            <Button className="text-right" variant="primary" type="submit">
-                                Sign Up
-                            </Button>
-                        </ ButtonToolbar>
-                    </div>
+                            <Field name="email">
+                                {({ field, meta }) => (
+                                    <div className="form-group">
+                                        <label htmlFor="name">Email</label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            className={`form-control ${meta.touched && meta.error ? 'is-invalid' : ''
+                                                }`}
+                                            {...field}
+                                        />
+                                        <ErrorMessage name="email" component="div" className="error text-danger" />
+                                    </div>
+                                )}
+                            </Field>
 
+                            <Field name="password">
+                                {({ field, meta }) => (
+                                    <div className="form-group">
+                                        <label htmlFor="name">Password</label>
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            className={`form-control ${meta.touched && meta.error ? 'is-invalid' : ''
+                                                }`}
+                                            {...field}
+                                        />
+                                        <ErrorMessage name="password" component="div" className="error text-danger" />
+                                    </div>
+                                )}
+                            </Field>
 
-                </Form>
+                            <Field name="confirm_password">
+                                {({ field, meta }) => (
+                                    <div className="form-group">
+                                        <label htmlFor="name">Confirm Password</label>
+                                        <input
+                                            type="password"
+                                            id="confirm_password"
+                                            className={`form-control ${meta.touched && meta.error ? 'is-invalid' : ''
+                                                }`}
+                                            {...field}
+                                        />
+                                        <ErrorMessage name="confirm_password" component="div" className="error text-danger" />
+                                    </div>
+                                )}
+                            </Field>
+
+                            <div className='d-flex justify-content-between'>
+                                <small>
+                                    <p>Don't have an account? <a href="/login">Login</a> here.
+                                    </p>
+                                </small>
+
+                                <ButtonToolbar className="text-right" >
+
+                                    {/* <Button className="text-right" variant="primary" type="submit">
+                                        Sign Up                                        
+                                    </Button> */}
+                                    <Button type="submit" variant="primary" className="text-right" disabled={isSubmitting}>
+                                        {isSubmitting ? 'Submitting...' : 'Sign Up'}
+                                    </Button>
+                                </ ButtonToolbar>
+                            </div>
+                        </Form>
+
+                    )}
+                </Formik>
 
             </fieldset>
 
@@ -84,4 +148,3 @@ const Registration = ({ onSubmit }) => {
     );
 }
 
-export default Registration

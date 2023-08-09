@@ -6,12 +6,13 @@ import SinglePost from "./SinglePost";
 import TaskList from "./Task";
 import EditTask from "./EditTask";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Registration from "./components/auth/registration";
+import { Registration } from "./components/auth/registration";
 import Login from "./components/auth/login";
 
 
 
 function App(props) {
+
 
 
   return (
